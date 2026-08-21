@@ -1,9 +1,20 @@
 """
-swksom: Solar Wind K-means Self-Organizing Maps
+swksom: Solar Wind Classification with Self-Organizing Maps
 
-A library for classifying solar wind observations using Self-Organizing Maps
-combined with K-means clustering. Predicts cluster assignments for solar wind
-data using a pre-trained toroidal SOM model.
+Classify solar wind observations into CSW, Ejecta, HAW, or SSW using a pre-trained 
+Self-Organizing Map (SOM) model. The pipeline includes automatic preprocessing 
+(Box-Cox and log transforms with RobustScaler) and visualization of results.
+
+Quick start:
+    from swksom import ClusterSOM
+    import pickle
+    
+    with open('./models/toroidal_som.pkl', 'rb') as f:
+        model = pickle.load(f)
+    
+    predictions = model.predict(scaled_data)
+
+See example.ipynb for complete usage tutorial.
 """
 
 from .ClusterSOM import ClusterSOM
