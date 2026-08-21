@@ -17,6 +17,8 @@ from kneed import KneeLocator
 from scipy.spatial.distance import cdist
 from sklearn.cluster import KMeans
 from sklearn.metrics import calinski_harabasz_score, silhouette_score
+import pandas as pd
+import matplotlib.pyplot as plt
 
 __all__ = [
     "estimate_batch_size",
@@ -132,4 +134,38 @@ def NumOptiClust(data: np.ndarray, method: str = "Kneedle", clr=None, folder=Non
             best_score = score
             best_k = clust
     return int(best_k)
+
+def plot_clusters_timeseries(df, features, fdict, cluster_mapping, clr):
+    df = df.copy()
+    df['Time'] = pd.to_datetime(df['Time'])
+    num_features = len(features)
+    nc = len(cluster_mapping)
+
+    fig, axes = plt.subplots(num_features + 1, 1, figsize=(12, 1.25 * (num_features + 1)), sharex=True)
+
+    for cluster in range(df['Cluster'].max() + 1):
+        for i, feature in enumerate(features):
+            ax = axes[i]
+            cluster_data = df[df['Cluster'] == cluster]
+            ax.scatter(cluster_data['Time'].values, cluster_data[feature].values, color=clr[cluster], s=0.5)
+            ax.set_ylabel(fdict.get(feature, feature))
+
+    # Extra subplot: cluster as categorical over time
+    ax = axes[-1]
+    for cluster in range(df['Cluster'].max() + 1):
+        cluster_data = df[df['Cluster'] == cluster]
+        ax.scatter(cluster_data['Time'].values, cluster_data['Cluster'].values, color=clr[cluster], s=0.5)
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width, box.height * 0.9])
+    ax.set_yticks(list(range(nc)))
+    ax.set_yticklabels([cluster_mapping[i] for i in range(nc)])
+    ax.set_ylabel('')
+    ax.set_xlim(df['Time'].iloc[0] - pd.Timedelta(minutes=5), df['Time'].iloc[-1] + pd.Timedelta(minutes=5))
+    plt.setp(ax.xaxis.get_majorticklabels(), rotation=15)
+
+    plt.xlabel('Time')
+    plt.show()
+
+    return fig, axes
 
