@@ -55,3 +55,35 @@ The model classifies solar wind into four categories:
 - **Ejecta**: Ejecta (ICME's Magnetic Obstacle)
 - **HAW**: Highly-Alfvénic Wind
 - **SSW**: Slow Solar Wind
+
+## Predict New Data
+
+Input CSV must include: `Time`, `V`, `Np`, `B`, `Tp`, `Texp/Tp`, `Pdyn`, `logBeta`, `B_rms`. From the OMNI HRO2 dataset, you can download a subset of data from [NASA OMNIWeb](https://omniweb.gsfc.nasa.gov/ow.html).
+
+```python
+import pickle, numpy as np, pandas as pd
+
+df = pd.read_csv("./data/new_download.csv")
+
+with open("./models/toroidal_som.pkl", "rb") as f: csom = pickle.load(f)
+with open("./transform/transform_v_boxcox.pkl", "rb") as f: boxcox = pickle.load(f)
+with open("./transform/robust_scaler_fit.pkl", "rb") as f: scaler = pickle.load(f)
+
+tdf = pd.DataFrame({
+	"Vboxcox": boxcox.transform(df[["V"]]).ravel(),
+	"logNp": np.log10(df["Np"]),
+	"logB": np.log10(df["B"]),
+	"logTp": np.log10(df["Tp"]),
+	"logTexp/Tp": np.log10(df["Texp/Tp"]),
+	"logPdyn": np.log10(df["Pdyn"]),
+	"logBeta": df["logBeta"],
+	"logB_rms": np.log10(df["B_rms"]),
+})
+
+X = scaler.transform(tdf[["Vboxcox","logNp","logB","logTp","logTexp/Tp","logPdyn","logBeta","logB_rms"]])
+df["Cluster"] = csom.predict(X)
+df["Wind_Type"] = df["Cluster"].map({0:"CSW",1:"Ejecta",2:"HAW",3:"SSW"})
+df.to_csv("./data/new_download_with_clusters.csv", index=False) #optional
+
+# The rest of the notebook demonstrates how to visualize the results with time series plots color-coded by wind type.
+```
