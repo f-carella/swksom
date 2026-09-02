@@ -87,3 +87,17 @@ df.to_csv("./data/new_download_with_clusters.csv", index=False) #optional
 
 # The rest of the notebook demonstrates how to visualize the results with time series plots color-coded by wind type.
 ```
+
+## Copyright and License
+
+Copyright (c) 2026 The authors. All rights reserved.
+
+This repository contains code associated with the manuscript:
+
+> [Paper citation to be added]
+> DOI: [To be added]
+
+The code is released for research and reproducibility purposes. Please cite the
+associated paper when using this software. No permission is granted to
+redistribute, modify, or use the code commercially without prior written
+permission from the copyright holders.
